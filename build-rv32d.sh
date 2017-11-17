@@ -11,6 +11,6 @@ build_project riscv-isa-sim --prefix=$RISCV --with-fesvr=$RISCV --with-isa=rv32i
 build_project riscv-gnu-toolchain --prefix=$RISCV --with-arch=rv32imfdc --with-abi=ilp32d
 CC= CXX= build_project riscv-pk --prefix=$RISCV --host=riscv32-unknown-elf
 build_project riscv-openocd --prefix=$RISCV --enable-remote-bitbang --disable-werror
-#build_project riscv-tests --prefix=$RISCV/riscv32-unknown-elf XLEN=32
+#build_project riscv-tests --prefix=$RISCV/riscv32-unknown-elf --with-xlen=32
 
 echo -e "\\nRISC-V Toolchain installation completed!"
