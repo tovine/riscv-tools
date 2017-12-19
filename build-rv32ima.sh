@@ -8,8 +8,8 @@
 echo "Starting RISC-V Toolchain build process"
 
 build_project riscv-fesvr --prefix=$RISCV
-build_project riscv-isa-sim --prefix=$RISCV --with-fesvr=$RISCV --with-isa=rv32ima
-build_project riscv-gnu-toolchain --prefix=$RISCV --with-arch=rv32ima --with-abi=ilp32
+build_project riscv-isa-sim --prefix=$RISCV --with-fesvr=$RISCV --with-isa=rv32imc
+build_project riscv-gnu-toolchain --prefix=$RISCV --mfloat-abi=soft --with-arch=rv32imc --with-abi=ilp32
 CC= CXX= build_project riscv-pk --prefix=$RISCV --host=riscv32-unknown-elf
 build_project riscv-openocd --prefix=$RISCV --enable-remote-bitbang --disable-werror
 
