@@ -22,18 +22,18 @@ This repo provides guides and references:
 
 Ubuntu packages needed:
 
-	$ sudo apt-get install autoconf automake autotools-dev curl device-tree-compiler libmpc-dev libmpfr-dev libgmp-dev libusb-1.0-0-dev gawk build-essential bison flex texinfo gperf libtool patchutils bc zlib1g-dev device-tree-compiler pkg-config
+	$ sudo apt-get install autoconf automake autotools-dev curl libmpc-dev libmpfr-dev libgmp-dev libusb-1.0-0-dev gawk build-essential bison flex texinfo gperf libtool patchutils bc zlib1g-dev device-tree-compiler pkg-config libexpat-dev
 
 Fedora packages needed:
 
-	$ sudo dnf install autoconf automake @development-tools curl dtc libmpc-devel mpfr-devel gmp-devel gawk build-essential bison flex texinfo gperf libtool patchutils bc zlib-devel
+	$ sudo dnf install autoconf automake @development-tools curl dtc libmpc-devel mpfr-devel gmp-devel libusb-devel gawk gcc-c++ bison flex texinfo gperf libtool patchutils bc zlib-devel expat-devel
 
 _Note:_ This requires a compiler with C++11 support (e.g. GCC >= 4.8).
 To use a compiler different than the default, use:
 
 	$ CC=gcc-5 CXX=g++-5 ./build.sh
 
-_Note for OS X:_ We recommend using [Homebrew](https://brew.sh) to install the dependencies (`dtc gawk gnu-sed gmp mpfr libmpc isl wget automake md5sha1sum`) or even to install the tools [directly](https://github.com/riscv/homebrew-riscv). This repo will build with Apple's command-line developer tools (clang) in addition to gcc.
+_Note for OS X:_ We recommend using [Homebrew](https://brew.sh) to install the dependencies (`libusb dtc gawk gnu-sed gmp mpfr libmpc isl wget automake md5sha1sum`) or even to install the tools [directly](https://github.com/riscv/homebrew-riscv). This repo will build with Apple's command-line developer tools (clang) in addition to gcc.
 
 # <a name="newlibman"></a>The RISC-V GCC/Newlib Toolchain Installation Manual
 
@@ -193,7 +193,7 @@ flex, bison, autotools, libmpc, libmpfr, and libgmp. Ubuntu distribution
 installations will require this command to be run. If you have not installed
 these things yet, then run this:
 
-	O$ sudo apt-get install autoconf automake autotools-dev curl device-tree-compiler libmpc-dev libmpfr-dev libgmp-dev gawk build-essential bison flex texinfo gperf libtool patchutils bc
+	O$ sudo apt-get install autoconf automake autotools-dev curl device-tree-compiler libmpc-dev libmpfr-dev libgmp-dev gawk build-essential bison flex texinfo gperf libtool patchutils bc zlib1g-dev
 
 Before we start installation, we need to set the
 `$RISCV` environment variable. The variable is used throughout the
@@ -304,6 +304,35 @@ This document is a mirrored version (with slight
 modifications) of the one found at 
 [Quan's OCF
 website](https://ocf.berkeley.edu/~qmn/linux/install.html)
+
+### Who Builds, or Needs to Build, Linux/RISC-V from Scratch?
+
+Some people choose to build, or may _have_ to build, the Linux/RISC-V kernel
+from scratch, which is the subject of this guide. You might build the kernel
+from scratch if you:
+
+* need special kernel features that are not already available in existing
+  distributions of Linux/RISC-V, or want to build the latest bleeding-edge
+  version of the kernel,
+* hack the kernel source code,
+* have special requirements for your operating system environment, and
+  therefore require a special initramfs (covered later),
+* want to learn how to build your own kernel, and/or
+* have a very particular notion of "fun".
+
+If you're not sure whether you fall into the above categories, you may not need to
+compile your own kernel. It's especially true if you want to "just get something
+on RISC-V working", in which case you may be better served by downloading a
+_Linux/RISC-V distribution_, which not only offers a pre-built Linux/RISC-V kernel
+but also a set of the programs and utilities you'll need to get started quickly.
+
+Distributions include:
+
+* [riscv-poky](https://github.com/riscv/riscv-poky), a port of the
+  Yocto/OpenEmbedded project (considering this "pre-built" is not quite accurate
+  but it is far simpler than this guide)
+* [riscv-gentoo](https://github.com/riscv/riscv-gentoo)
+
 
 ## Table of Contents
 
@@ -523,7 +552,7 @@ can be very useful to enable "early printk", which will print messages to the
 console if the kernel crashes very early. You can access this option at "Early
 printk" in the "Kernel hacking" submenu.
 
-<img src="http://riscv.org/install-guides/linux-menuconfig.png" />
+<img src="doc/linux-menuconfig.png" />
 
 _Linux kernel menuconfig interface._
 
@@ -589,7 +618,7 @@ Enter the configuration interface much in the same way as that of the Linux kern
 
 	O$ make menuconfig
 
-<img src="http://riscv.org/install-guides/busybox-menuconfig.png" />
+<img src="doc/busybox-menuconfig.png" />
 
 _BusyBox menuconfig interface. Looks familiar, eh?_
 
@@ -608,13 +637,18 @@ back into the directory with the Linux sources.
 
 ## <a name="creating-root-disk"></a> Creating a Root Disk Image
 
-We use an initramfs to store our binaries ([BusyBox](https://www.busybox.net) in
-particular).
+At this point, we have a compiled Linux kernel and some BusyBox utilities. We'll
+create an initramfs to round out a minimal operating system environment. An
+initramfs is an _initial_ file system that resides entirely in memory. It's much
+simpler to work with, especially in software simulation (namely, a time when
+the ISA simulator lacked mature IO support). You might want to build your own
+initramfs if you have special requirements, such as extremely limited storage.
 
-Currently, we have a root file system pre-packaged
-specifically for the RISC-V release. You can obtain it by heading to the index
-of my website, [https://ocf.berkeley.edu/~qmn](https://ocf.berkeley.edu/~qmn), finding my
-email, and contacting me.
+As a reminder, if you don't have any of these special requirements, or if
+you're trying out RISC-V for the first time, consider using
+[riscv-poky](https://github.com/riscv/riscv-poky), or any other Linux/RISC-V
+_distribution_, which sidesteps the need to create your own initramfs or even
+compile your own kernel.
 
 To create your own initramfs, there are a few directories that you should have:
 
@@ -723,7 +757,7 @@ applets. Have fun!
 
 To exit the simulator, hit `Ctrl-C`.
 
-<img src="http://riscv.org/install-guides/linux-boot.png"/>
+<img src="doc/linux-boot.png"/>
 
 _Linux boot and "Hello world!"_
 
